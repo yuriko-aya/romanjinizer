@@ -3,8 +3,11 @@ Give japanese text romanji in html-formated
 
 ## dependency
 MeCab python
+
 romkan
+
 sqlite3
+
 glob
 
 ## Usage
