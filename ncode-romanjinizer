@@ -9,16 +9,18 @@ import sqlite3
 import glob
 
 
-db1 = '/home/alice/lab/romanjinizer/jdict2.sqlite'
-db2 = '/home/alice/lab/romanjinizer/jdict.sqlite'
+db1 = 'jdict2.sqlite'
+db2 = 'jdict.sqlite'
 
 if len(sys.argv) < 2:
     sys.exit("Please specify the file")
 
-def html_header(title,chapter,next,previous):
+
+def html_header(title, chapter, next, previous):
     if next is not None:
         nextchap = next.split(".")[0]
-        next_link = '<a href="' + nextchap + '.html"> Next: ' + nextchap + '</a>'
+        next_link = '<a href="' + nextchap + '.html"> Next: ' +\
+                    nextchap + '</a>'
     else:
         next_link = ""
     if previous is not None:
@@ -38,16 +40,19 @@ def html_header(title,chapter,next,previous):
     }
     </style>
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
     <!-- jQuery library -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script
+    src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
     <!-- Latest compiled JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>  
+    <script
+    src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     </head>
     <body class="h3">
-    <div class="container"> 
+    <div class="container">
     <h1 class="text-center">""" + title + ' - ' + chapter + """</h1>
     <hr>
     <div class="row">
@@ -55,7 +60,7 @@ def html_header(title,chapter,next,previous):
     """ + prev_link + """
     </div>
     <div class="col-xs-4 text-center">
-    <a href="/?dir=""" + title +"""">Home</a>
+    <a href="/?dir=""" + title + """">Home</a>
     </div>
     <div class="col-xs-4 text-right">
     """ + next_link + """
@@ -65,16 +70,18 @@ def html_header(title,chapter,next,previous):
     """
     return html_str
 
+
 def html_footer():
     html_str = """
     <script>
     $(document).ready(function(){
-        $('[data-toggle="popover"]').popover();   
+        $('[data-toggle="popover"]').popover();
     });
     </script>
     </div>
     """
     return html_str
+
 
 def next_file(filename):
     file_list = glob.glob('*.txt')
@@ -84,6 +91,7 @@ def next_file(filename):
         return None
     return file_list[next_index]
 
+
 def prev_file(filename):
     file_list = glob.glob('*.txt')
     file_list.sort()
@@ -92,23 +100,27 @@ def prev_file(filename):
     prev_index = file_list.index(filename) - 1
     return file_list[prev_index]
 
-def db_conn(db,word):
+
+def db_conn(db, word):
     con = sqlite3.connect(db)
     con.text_factory = str
     cur = con.cursor()
-    cur.execute('SELECT * FROM edict WHERE word LIKE "' + word + '" OR kana LIKE "' + romkan.to_hiragana(word) + '"')
+    cur.execute('SELECT * FROM edict WHERE word LIKE "' + word +
+                '" OR kana LIKE "' + romkan.to_hiragana(word) + '"')
     rows = cur.fetchall()
     return rows
+
 
 def open_file(files):
     with open(files, "r") as my_file:
         data = my_file.read()
     return data
 
+
 def db_result(word):
-    result = db_conn(db1,word)
+    result = db_conn(db1, word)
     if len(result) == 0:
-        result = db_conn(db2,word)
+        result = db_conn(db2, word)
         if len(result) != 0:
             rows = result
     else:
@@ -119,60 +131,61 @@ def db_result(word):
 def dictionary(word):
     rows = db_result(word)
     for row in rows:
-           result =  row[0] + '【' + row[1] + '】' + row[2] +'\n'
-           return result
-           
-def henkan(text) :
-    hiragana=[chr(i) for i in range(12353, 12436)]
-    katakana=[chr(i) for i in range(12449, 12532)]
-    kana=""
-    #読み仮名のカタかなをひらがなに
+            result = row[0] + '【' + row[1] + '】' + row[2] + '\n'
+            return result
+
+
+def henkan(text):
+    hiragana = [chr(i) for i in range(12353, 12436)]
+    katakana = [chr(i) for i in range(12449, 12532)]
+    kana = ""
+    # 読み仮名のカタかなをひらがなに
     for text in list(text):
         for i in range(83):
             if text == katakana[i]:
-                kana+=hiragana[i]
+                kana += hiragana[i]
     return kana
 
 
-def tohensu(origin,kana) :
-    origin="".join(origin)
-    kana="".join(kana)
-    return origin,kana
-
-def kanadelete(origin,kana) :
-    origin=list(origin)
-    kana=list(kana)
-    num1=len(origin)
-    num2=len(kana)
-    okurigana=""
+def tohensu(origin, kana):
+    origin = "".join(origin)
+    kana = "".join(kana)
+    return origin, kana
 
 
-    if origin[num1-1] == kana[num2-1] and origin[num1-2] == kana[num2-2] :
-        okurigana=origin[num1-2]+origin[num1-1]
+def kanadelete(origin, kana):
+    origin = list(origin)
+    kana = list(kana)
+    num1 = len(origin)
+    num2 = len(kana)
+    okurigana = ""
 
-        origin[num1-1]=""
-        origin[num1-2]=""
-        kana[num2-1]=""
-        kana[num2-2]=""
+    if origin[num1 - 1] == kana[num2 - 1] and origin[num1 - 2] == kana[num2 - 2]:
+        okurigana = origin[num1 - 2] + origin[num1 - 1]
 
-        origin,kana=tohensu(origin,kana)
+        origin[num1 - 1] = ""
+        origin[num1 - 2] = ""
+        kana[num2 - 1] = ""
+        kana[num2 - 2] = ""
 
-    elif origin[num1-1] == kana[num2-1] :
+        origin, kana = tohensu(origin, kana)
 
-        okurigana=origin[num1-1]
+    elif origin[num1 - 1] == kana[num2 - 1]:
 
-        origin[num1-1]=""
-        kana[num2-1]=""
-        origin="".join(origin)
-        kana="".join(kana)
-    else :
-        origin,kana=tohensu(origin,kana)
+        okurigana = origin[num1 - 1]
 
-    return origin,kana,okurigana
+        origin[num1 - 1] = ""
+        kana[num2 - 1] = ""
+        origin = "".join(origin)
+        kana = "".join(kana)
+    else:
+        origin, kana = tohensu(origin, kana)
+
+    return origin, kana, okurigana
 
 
 mecab = MeCab.Tagger("-Ochasen")
-mecab.parse('')#空でパースする必要がある
+mecab.parse('')  # 空でパースする必要がある
 filename = os.path.basename(sys.argv[1])
 name = filename.split(".")[0]
 full_path = os.getcwd()
@@ -183,48 +196,56 @@ if os.path.isfile(name + ".html"):
 nextch = next_file(filename)
 prevch = prev_file(filename)
 html_file = open(name + ".html", "a")
-html_file.write(html_header(title,name,nextch,prevch))
+html_file.write(html_header(title, name, nextch, prevch))
 for line in novel_lines.readlines():
-    node=mecab.parseToNode(line)
-    while node :
-        origin=node.surface#もとの単語を代入
+    node = mecab.parseToNode(line)
+    while node:
+        origin = node.surface  # もとの単語を代入
         if len(node.feature.split(",")) > 7:
-            yomi=node.feature.split(",")[7]#読み仮名を代入
+            yomi = node.feature.split(",")[7]  # 読み仮名を代入
         else:
-            yomi=node.surface
-        kana=henkan(yomi)
+            yomi = node.surface
+        kana = henkan(yomi)
 
-        #正規表現で漢字と一致するかをチェック
+        # 正規表現で漢字と一致するかをチェック
         pattern = "[一-龥]"
-        matchOB = re.match(pattern , origin)
+        matchOB = re.match(pattern, origin)
 
-
-        #originが空のとき、漢字以外の時はふりがなを振る必要がないのでそのまま出力する
+        # originが空のとき、漢字以外の時はふりがなを振る必要がないのでそのまま出力する
         if origin != "" and matchOB:
             if kana == "":
                 kana = origin
             else:
-                origin,kana,okurigana=kanadelete(origin,kana)
+                origin, kana, okurigana = kanadelete(origin, kana)
             romaji = romkan.to_roma(kana)
             romokuri = romkan.to_roma(okurigana)
             dicti = dictionary(origin)
             if dicti is not None:
-                html_file.write('<ruby title="' + romaji + '" data-toggle="popover" data-trigger="hover" data-content="' + dicti + '" class="bg-success"><rb>' + origin + '</rb><rt>' + romaji + '</rt></ruby>')
+                html_file.write('<ruby title="' + romaji +
+                                '" data-toggle="popover" data-trigger="hover"'
+                                ' data-content="' + dicti + '"'
+                                ' class="bg-success"><rb>' + origin + '</rb>'
+                                '<rt>' + romaji + '</rt></ruby>')
             else:
-                html_file.write('<ruby><rb>' + origin + '</rb><rt>' + romaji + '</rt></ruby>')
+                html_file.write('<ruby><rb>' + origin + '</rb><rt>' +
+                                romaji + '</rt></ruby>')
             if okurigana != "":
-                html_file.write("<ruby><rb>" + okurigana + "</rb><rt>" + romokuri + "</rt></ruby>")
+                html_file.write("<ruby><rb>" + okurigana + "</rb><rt>" +
+                                romokuri + "</rt></ruby>")
         elif origin != "":
             romaji = romkan.to_roma(origin)
             dicti = dictionary(origin)
             if dicti is not None:
-                html_file.write('<ruby title="' + romaji + '" data-toggle="popover" data-trigger="hover" data-content="' + dicti + '" class="bg-success"><rb>' + origin + '</rb><rt>' + romaji + '</rt></ruby>')
+                html_file.write('<ruby title="' + romaji +
+                                '" data-toggle="popover" data-trigger="hover"'
+                                ' data-content="' + dicti +
+                                '" class="bg-success"><rb>' + origin +
+                                '</rb><rt>' + romaji + '</rt></ruby>')
             else:
-                html_file.write('<ruby><rb>' + origin + '</rb><rt>' + romaji + '</rt></ruby>')
-        
+                html_file.write('<ruby><rb>' + origin + '</rb><rt>' +
+                                romaji + '</rt></ruby>')
 
-
-        node=node.next
+        node = node.next
     html_file.write("<br>")
 html_file.write(html_footer())
 html_file.close()
